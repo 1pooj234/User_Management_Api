@@ -4,7 +4,7 @@ const Company = require("../models/Company");
 const permitUser = require("../middleware/permitUser");
 const router = express.Router();
 
-router.post("/employee/signup", async (req, res) => {
+router.post("/signup/employee", async (req, res) => {
   try {
     const companyExist = await Company.findOne({
       companyName: req.body.employeeCompany,
@@ -25,7 +25,7 @@ router.post("/employee/signup", async (req, res) => {
   }
 });
 
-router.post("/employee/login", async (req, res) => {
+router.post("/login/employee", async (req, res) => {
   try {
     // const emp = await new Employee();
     const employee = await Employee.empLogin(req.body);
@@ -44,7 +44,7 @@ router.get("/profile/employee", permitUser, async (req, res) => {
   }
 });
 
-router.post("/employee/logout", permitUser, async (req, res) => {
+router.post("/logout/employee", permitUser, async (req, res) => {
   try {
     if (!req.user) {
       return res.status(404).send();
