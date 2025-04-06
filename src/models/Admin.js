@@ -14,6 +14,7 @@ const adminSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true,
+    lowercase: true,
     trim: true,
     validate: (value) => {
       if (!validator.isEmail(value)) {

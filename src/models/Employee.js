@@ -14,6 +14,7 @@ const employeeSchema = new mongoose.Schema({
     type: String,
     trim: true,
     unique: true,
+    lowercase: true,
     required: true,
     validate: (value) => {
       if (!validator.isEmail(value)) {
