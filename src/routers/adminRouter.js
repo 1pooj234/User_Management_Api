@@ -76,7 +76,7 @@ router.get("/allusers/admin", permitUser, async (req, res) => {
     }
     // console.log(req.user);
     await req.user.populate("emps");
-    res.send(req.user.emps);
+    res.send([req.user, ...req.user.emps]);
   } catch (e) {
     return res.status(404).send(e);
   }
