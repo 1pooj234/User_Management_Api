@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const { adminRouter } = require("./routers/adminRouter");
 const employeeRouter = require("./routers/employeeRouter");
 require("./db");
