@@ -86,4 +86,16 @@ router.delete("/remove/employee", permitUser, async (req, res) => {
   }
 });
 
+router.get("/allusers/employee", permitUser, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(404).send();
+    }
+    const allUsers = await Employee.find({});
+    res.send(allUsers);
+  } catch (e) {
+    return res.status(404).send(e);
+  }
+});
+
 module.exports = router;
