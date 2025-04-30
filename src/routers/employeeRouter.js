@@ -91,7 +91,7 @@ router.get("/allusers/employee", permitUser, async (req, res) => {
     if (!req.user) {
       return res.status(404).send();
     }
-    const allUsers = await Employee.find({});
+    const allUsers = await Employee.find({ adminId: req.user.adminId });
     res.send(allUsers);
   } catch (e) {
     return res.status(404).send(e);
