@@ -32,7 +32,7 @@ router.post("/login/employee", async (req, res) => {
     const token = await employee.userAuth();
     return res.status(200).send({ employee, token });
   } catch (e) {
-    return res.status(400).send(e);
+    return res.status(404).send(e);
   }
 });
 
