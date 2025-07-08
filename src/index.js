@@ -5,7 +5,12 @@ const employeeRouter = require("./routers/employeeRouter");
 require("./db");
 const app = express();
 const port = process.env.PORT;
-app.use(cors());
+app.use(cors({
+  origin: 'https://usermanageapp.netlify.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // if you send cookies or auth headers
+}));
 app.use(express.json());
 app.use(adminRouter);
 app.use(employeeRouter);
