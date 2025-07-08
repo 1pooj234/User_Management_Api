@@ -11,6 +11,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true // if you send cookies or auth headers
 }));
+app.options('*', cors());
 app.use(express.json());
 app.use(adminRouter);
 app.use(employeeRouter);
