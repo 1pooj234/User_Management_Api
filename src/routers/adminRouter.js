@@ -54,7 +54,7 @@ router.post("/logout/admin", permitUser, async (req, res) => {
 });
 
 router.patch("/update/admin", permitUser, async (req, res) => {
-  const fields = ["name", "email", "password", "noOfEmployees", "companyName"];
+  const fields = ["name", "email", "password", "companyName"];
   const updateKeys = Object.keys(req.body);
   const isValid = updateKeys.every((key) => fields.includes(key));
   if (!isValid) {
