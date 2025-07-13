@@ -82,9 +82,10 @@ adminSchema.virtual("emps", {
 });
 
 adminSchema.pre("save", async function (next) {
-  const user = this;
-  if (user.isModified("password")) {
-    user.password = await bcrypt.hash(user.password, 8);
+  if (!this.isModified("password")) return next();
+  if (this.password) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
   }
   next();
 });
