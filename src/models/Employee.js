@@ -61,14 +61,14 @@ const employeeSchema = new mongoose.Schema({
 });
 
 employeeSchema.pre("save", async function (next) {
-  const employee = this;
-
-  if (employee.isModified("password")) {
-    employee.password = await bcrypt.hash(employee.password, 8);
+  if (!this.isModified("password")) return next();
+  if (this.password) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
   }
-
   next();
 });
+
 
 employeeSchema.methods.userAuth = async function () {
   const emp = this;
