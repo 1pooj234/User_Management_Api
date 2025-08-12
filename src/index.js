@@ -7,8 +7,8 @@ const app = express();
 const port = process.env.PORT;
 app.use(
   cors({
-    origin: "https://usermanageapp.netlify.app",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // if you send cookies or auth headers
   })

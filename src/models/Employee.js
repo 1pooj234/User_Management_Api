@@ -1,42 +1,46 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-const Company = require("./Company");
 const jwt = require("jsonwebtoken");
+
+function throwValidationError(field, message) {
+  const error = new mongoose.Error.ValidationError();
+  error.addError(field, new mongoose.Error.ValidatorError({ message }));
+  throw error;
+}
+
 const employeeSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, "Name is required"],
     trim: true,
-    minlenght: 7,
+    minlength: [7, "Name must be at least 7 characters long"],
   },
   email: {
     type: String,
     trim: true,
     unique: true,
     lowercase: true,
-    required: true,
-    validate: (value) => {
-      if (!validator.isEmail(value)) {
-        throw new Error("invalid email");
-      }
+    required: [true, "Email is required"],
+    validate: {
+      validator: (value) => validator.isEmail(value),
+      message: "Invalid email address",
     },
   },
   password: {
     type: String,
     trim: true,
-    required: true,
-    validate: (value) => {
-      if (
-        !validator.isStrongPassword(value, {
+    required: [true, "Password is required"],
+    validate: {
+      validator: (value) =>
+        validator.isStrongPassword(value, {
           minSymbols: 1,
           minLength: 8,
           minUppercase: 1,
           minNumbers: 1,
-        })
-      ) {
-        throw new Error("invalid password");
-      }
+        }),
+      message:
+        "Password must have at least 1 uppercase letter, 1 number, and 1 special symbol",
     },
   },
   role: {
@@ -47,13 +51,17 @@ const employeeSchema = new mongoose.Schema({
     type: String,
     trim: true,
     lowercase: true,
-    required: true,
+    required: [true, "Employee company is required"],
   },
   adminId: {
-    type: mongoose.SchemaTypes.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",
   },
-  tokens: [],
+  tokens: [
+    {
+      token: { type: String },
+    },
+  ],
   permitted: {
     type: Boolean,
     default: false,
@@ -61,47 +69,38 @@ const employeeSchema = new mongoose.Schema({
 });
 
 employeeSchema.pre("save", async function (next) {
-  const employee = this;
-
-  if (employee.isModified("password")) {
-    employee.password = await bcrypt.hash(employee.password, 8);
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 8);
   }
-
   next();
 });
 
 employeeSchema.methods.userAuth = async function () {
-  const emp = this;
-  const token = await jwt.sign({ _id: emp._id }, process.env.JWT_KEY);
-  emp.tokens = [...emp.tokens, { token }];
-  await emp.save();
+  const token = jwt.sign({ _id: this._id }, process.env.JWT_KEY);
+  this.tokens.push({ token });
+  await this.save();
   return token;
 };
 
-employeeSchema.statics.empLogin = async (emp) => {
-  const employeeExists = await Employee.findOne({ email: emp.email });
-  const passwordMatch = await bcrypt.compare(
-    emp.password,
-    employeeExists.password
-  );
-  if (employeeExists) {
-    if (passwordMatch) {
-      return employeeExists;
-    } else {
-      throw new Error("incorrect password");
-    }
-  } else {
-    throw new Error("user doesnt exist");
+employeeSchema.statics.empLogin = async ({ email, password }) => {
+  if (!email || !password) {
+    throw new Error("Email and password are required");
   }
-};
+  const employee = await Employee.findOne({ email });
+  if (!employee) {
+    const err = new Error("Invalid email");
+    err.field = "email";
+    throw err;
+  }
+  const isMatch = await bcrypt.compare(password, employee.password);
+  if (!isMatch) {
+    const err = new Error("Invalid password");
+    err.field = "password";
+    throw err;
+  }
 
-employeeSchema.pre(
-  "deleteOne",
-  { query: false, document: true },
-  async function (next) {
-    next();
-  }
-);
+  return employee;
+};
 
 employeeSchema.methods.toJSON = function () {
   const emp = this.toObject();
