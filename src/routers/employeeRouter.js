@@ -24,6 +24,9 @@ router.post("/signup/employee", async (req, res) => {
     if (err.name === "ValidationError") {
       return res.status(400).send({ error: err.message });
     }
+    if (err.message === "Company does not exist") {
+      return res.status(400).send({ error: err.message });
+    }
     if (err.code === 11000) {
       return res.status(400).send({ error: "Email already exists" });
     }
@@ -95,6 +98,15 @@ router.delete("/remove/employee", permitUser, async (req, res) => {
     return res.status(200).send();
   } catch (e) {
     return res.status(404).send();
+  }
+});
+
+router.get("/all/users/companies", async (req, res) => {
+  try {
+    const companies = await Company.find();
+    res.status(200).send(companies);
+  } catch (e) {
+    res.status(500).send({ error: "server error" });
   }
 });
 
